@@ -1,0 +1,30 @@
+# ---------------------------------------------------------------------------
+# Dependencies (downloaded from Maven Central on first use, cached in ivy-cache)
+# ---------------------------------------------------------------------------
+spark.jars.packages  org.apache.iceberg:iceberg-spark-runtime-4.1_2.13:1.11.0,org.apache.iceberg:iceberg-aws-bundle:1.11.0,org.postgresql:postgresql:42.7.4,org.apache.spark:spark-sql-kafka-0-10_2.13:4.1.2
+spark.jars.ivy       /opt/spark/ivy-cache
+
+# ---------------------------------------------------------------------------
+# Iceberg catalog "lakehouse": metadata in Postgres (JDBC), data in S3 (SeaweedFS)
+# ---------------------------------------------------------------------------
+spark.sql.extensions                              org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
+spark.sql.catalog.lakehouse                       org.apache.iceberg.spark.SparkCatalog
+spark.sql.catalog.lakehouse.catalog-impl          org.apache.iceberg.jdbc.JdbcCatalog
+spark.sql.catalog.lakehouse.uri                   jdbc:postgresql://postgres:5432/iceberg_catalog
+spark.sql.catalog.lakehouse.jdbc.user             iceberg
+spark.sql.catalog.lakehouse.jdbc.password         __ICEBERG_CATALOG_PASSWORD__
+spark.sql.catalog.lakehouse.jdbc.schema-version   V1
+spark.sql.catalog.lakehouse.warehouse             s3://lakehouse/warehouse
+spark.sql.catalog.lakehouse.io-impl               org.apache.iceberg.aws.s3.S3FileIO
+spark.sql.catalog.lakehouse.s3.endpoint           http://seaweedfs:8333
+spark.sql.catalog.lakehouse.s3.path-style-access  true
+spark.sql.catalog.lakehouse.client.region         us-east-1
+spark.sql.defaultCatalog                          lakehouse
+
+# ---------------------------------------------------------------------------
+# General
+# ---------------------------------------------------------------------------
+spark.master                 local[*]
+spark.driver.memory          2g
+spark.sql.session.timeZone   UTC
+spark.ui.showConsoleProgress false
