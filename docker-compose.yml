@@ -24,5 +24,17 @@ services:
       timeout: 5s
       retries: 5
 
+  generator:
+    build: ./generator
+    container_name: generator
+    env_file: .env
+    environment:
+      POSTGRES_HOST: postgres
+      GENERATOR_INTERVAL_SECONDS: "2"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   postgres_data:
