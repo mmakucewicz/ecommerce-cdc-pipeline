@@ -5,8 +5,9 @@ USER root
 # Writable directories for the non-root "spark" user:
 #  - conf-runtime: spark-defaults.conf rendered at container start (with secrets from env)
 #  - ivy-cache:    downloaded Maven packages (Iceberg, AWS bundle, JDBC driver, Kafka connector)
-RUN mkdir -p /opt/spark/conf-runtime /opt/spark/ivy-cache /opt/spark/conf-templates \
-    && chown -R spark:spark /opt/spark/conf-runtime /opt/spark/ivy-cache
+#  - checkpoints:  Structured Streaming checkpoints (Kafka offsets already processed)
+RUN mkdir -p /opt/spark/conf-runtime /opt/spark/ivy-cache /opt/spark/checkpoints /opt/spark/conf-templates \
+    && chown -R spark:spark /opt/spark/conf-runtime /opt/spark/ivy-cache /opt/spark/checkpoints
 
 COPY --chown=spark:spark conf/spark-defaults.conf.template /opt/spark/conf-templates/spark-defaults.conf.template
 COPY --chmod=755 start.sh /opt/spark/start.sh

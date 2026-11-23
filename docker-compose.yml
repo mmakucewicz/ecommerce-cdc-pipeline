@@ -57,6 +57,9 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_NUM_PARTITIONS: 1
       KAFKA_HEAP_OPTS: "-Xms512m -Xmx1g"
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+    volumes:
+      - kafka_data:/var/lib/kafka/data
     healthcheck:
       test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1"]
       interval: 10s
@@ -67,6 +70,7 @@ services:
   connect:
     image: quay.io/debezium/connect:3.4.3.Final
     container_name: connect
+    restart: unless-stopped
     ports:
       - "8083:8083"
     environment:
@@ -149,6 +153,7 @@ services:
 
   spark:
     build: ./spark
+    image: ecommerce-cdc-spark:latest
     container_name: spark
     command: ["tail", "-f", "/dev/null"]
     environment:
@@ -169,7 +174,40 @@ services:
       create-bucket:
         condition: service_completed_successfully
 
+  cdc-streaming:
+    build: ./spark
+    image: ecommerce-cdc-spark:latest
+    container_name: cdc-streaming
+    command: ["/opt/spark/bin/spark-submit", "/opt/spark/jobs/cdc_to_iceberg.py"]
+    environment:
+      AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY}
+      AWS_SECRET_ACCESS_KEY: ${S3_SECRET_KEY}
+      AWS_REGION: us-east-1
+      ICEBERG_CATALOG_PASSWORD: ${ICEBERG_CATALOG_PASSWORD}
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      CDC_TOPIC_PREFIX: shop.ecommerce
+      CHECKPOINT_LOCATION: /opt/spark/checkpoints/cdc_to_iceberg
+      TRIGGER_INTERVAL: "10 seconds"
+    ports:
+      - "4041:4040"   # Spark UI of the streaming job
+    volumes:
+      - spark_ivy:/opt/spark/ivy-cache
+      - spark_checkpoints:/opt/spark/checkpoints
+      - ./spark/jobs:/opt/spark/jobs:ro
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      seaweedfs:
+        condition: service_healthy
+      create-bucket:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   seaweedfs_data:
+  kafka_data:
   spark_ivy:
+  spark_checkpoints:
