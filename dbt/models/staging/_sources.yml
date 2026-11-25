@@ -1,0 +1,27 @@
+version: 2
+
+sources:
+  - name: silver
+    description: Current state of the source tables, maintained by the Spark CDC streaming job (MERGE).
+    database: lakehouse
+    schema: silver
+    loaded_at_field: _ingested_at
+    freshness:
+      warn_after: {count: 5, period: minute}
+      error_after: {count: 30, period: minute}
+    tables:
+      - name: customers
+      - name: products
+      - name: orders
+      - name: order_items
+
+  - name: bronze
+    description: Every Debezium change event, append-only history.
+    database: lakehouse
+    schema: bronze
+    tables:
+      - name: cdc_events
+        loaded_at_field: ingested_at
+        freshness:
+          warn_after: {count: 5, period: minute}
+          error_after: {count: 30, period: minute}

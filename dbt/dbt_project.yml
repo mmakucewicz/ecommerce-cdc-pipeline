@@ -1,0 +1,17 @@
+name: ecommerce
+version: "1.0.0"
+profile: ecommerce
+
+model-paths: ["models"]
+test-paths: ["tests"]
+
+clean-targets:
+  - target
+  - dbt_packages
+
+models:
+  ecommerce:
+    staging:
+      +materialized: ephemeral   # inlined as CTEs, no objects created
+    marts:
+      +materialized: table

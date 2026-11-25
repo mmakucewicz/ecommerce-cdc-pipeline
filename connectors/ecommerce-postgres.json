@@ -15,7 +15,8 @@
   "publication.autocreate.mode": "disabled",
 
   "schema.include.list": "ecommerce",
-  "table.include.list": "ecommerce.customers,ecommerce.products,ecommerce.orders,ecommerce.order_items",
+  "table.include.list": "ecommerce.customers,ecommerce.products,ecommerce.orders,ecommerce.order_items,ecommerce.debezium_signal",
+  "signal.data.collection": "ecommerce.debezium_signal",
 
   "snapshot.mode": "initial",
   "decimal.handling.mode": "string",

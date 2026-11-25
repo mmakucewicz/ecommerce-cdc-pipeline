@@ -10,6 +10,11 @@ venv/
 # Docker volumes / local data
 data/
 
+# dbt artifacts
+dbt/target/
+dbt/logs/
+dbt/dbt_packages/
+
 # IDE
 .vscode/
 .idea/

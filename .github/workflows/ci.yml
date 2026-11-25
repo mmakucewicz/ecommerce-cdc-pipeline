@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install tools
+        run: pip install ruff==0.16.9 dbt-core==1.11.12 dbt-trino==1.10.2
+
+      - name: Lint Python (generator, Spark jobs, Airflow DAGs)
+        run: ruff check generator spark/jobs airflow/dags
+
+      - name: Validate Docker Compose file
+        run: |
+          cp .env.example .env
+          docker compose config --quiet
+
+      - name: Validate dbt project
+        working-directory: dbt
+        run: dbt parse --profiles-dir .

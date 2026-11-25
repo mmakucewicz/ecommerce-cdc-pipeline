@@ -1,0 +1,13 @@
+ecommerce:
+  target: dev
+  outputs:
+    dev:
+      type: trino
+      method: none          # local Trino without authentication
+      user: dbt
+      host: trino
+      port: 8080
+      http_scheme: http
+      database: lakehouse   # Trino catalog = Iceberg JDBC catalog
+      schema: gold          # Iceberg namespace for dbt models
+      threads: 4
