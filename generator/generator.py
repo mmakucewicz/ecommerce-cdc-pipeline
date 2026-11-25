@@ -259,11 +259,10 @@ def main():
         action = random.choices(functions, weights=weights, k=1)[0]
         try:
             # One action = one transaction (e.g. an order and its items commit together)
-            with conn.transaction():
-                with conn.cursor() as cur:
-                    message = action(cur)
-                    if message is None:
-                        message = new_order(cur)
+            with conn.transaction(), conn.cursor() as cur:
+                message = action(cur)
+                if message is None:
+                    message = new_order(cur)
             log.info(message)
         except psycopg.OperationalError:
             log.exception("Connection problem, reconnecting...")
